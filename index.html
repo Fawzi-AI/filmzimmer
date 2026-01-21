@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Filmzimmer - Your personal movie and TV series journal">
+    <title>Filmzimmer | Home</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'fz-dark': '#0a0a0f',
+                        'fz-darker': '#050508',
+                        'fz-card': '#12121a',
+                        'fz-border': '#1e1e2e',
+                        'fz-accent': '#6366f1',
+                        'fz-accent-hover': '#818cf8',
+                        'fz-text': '#e2e8f0',
+                        'fz-text-muted': '#94a3b8',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body class="bg-fz-dark text-fz-text font-sans min-h-screen">
+
+<!-- Navigation Mount Point -->
+<nav id="mount-navbar"></nav>
+
+<!-- Main Application Container -->
+<main id="mount-app">
+
+    <!-- Initial Loading State -->
+    <div id="loading-indicator" class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <div class="w-12 h-12 border-4 border-fz-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-fz-text-muted">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Section Mount Points -->
+    <section id="mount-hero" class="hidden"></section>
+    <section id="mount-trending" class="hidden"></section>
+    <section id="mount-movies" class="hidden"></section>
+    <section id="mount-series" class="hidden"></section>
+    <section id="mount-people" class="hidden"></section>
+
+</main>
+
+<!-- Modal Mount Points -->
+<div id="mount-search-modal"></div>
+<div id="mount-oskar-chat"></div>
+
+<!-- Footer Mount Point -->
+<footer id="mount-footer"></footer>
+
+<!-- Application Entry Point -->
+<script type="module" src="./src/04_pages/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+/**
+ * ============================================================================
+ * Filmzimmer Base Styles
+ * ============================================================================
+ *
+ * Global styles and utility classes that complement Tailwind CSS.
+ * Component-specific styles should be added by Patrick in separate files.
+ */
+
+/* ============================================================================
+   SCROLLBAR UTILITIES
+   ============================================================================ */
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Custom scrollbar for visible scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #12121a;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1e1e2e;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #6366f1;
+}
+
+/* ============================================================================
+   TEXT UTILITIES
+   ============================================================================ */
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ============================================================================
+   TRANSITION UTILITIES
+   ============================================================================ */
+
+.transition-default {
+    transition-property: color, background-color, border-color, opacity, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+}
+
+/* ============================================================================
+   FOCUS STATES (Accessibility)
+   ============================================================================ */
+
+:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* ============================================================================
+   LOADING STATES
+   ============================================================================ */
+
+@keyframes skeleton-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.skeleton {
+    animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    background-color: #1e1e2e;
+}
+
+/* ============================================================================
+   SMOOTH SCROLL
+   ============================================================================ */
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================================================
+   HOVER CARD COMPONENT
+   ============================================================================ */
+
+.hover-card {
+    transition: opacity 150ms ease-out, transform 150ms ease-out;
+    transform: scale(0.95);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.hover-card-visible {
+    transform: scale(1);
+}
+
+/* Cast item styles */
+.hover-card-cast-item img {
+    border: 2px solid transparent;
+    transition: border-color 200ms ease;
+}
+
+.hover-card-cast-item:hover img {
+    border-color: #6366f1;
+}

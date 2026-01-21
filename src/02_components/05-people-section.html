@@ -1,0 +1,77 @@
+<!-- People Section Template -->
+<div class="people-section py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Section Header -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-white">
+                Popular People
+            </h2>
+            <a href="#" 
+               class="text-fz-accent hover:text-fz-accent-hover text-sm font-medium transition-colors"
+               data-action="view-all-people">
+                View All
+            </a>
+        </div>
+        
+        <!-- People Carousel -->
+        <div class="relative">
+            
+            <!-- Scroll Left Button -->
+            <button class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 bg-fz-card/90 hover:bg-fz-accent rounded-full flex items-center justify-center border border-fz-border transition-colors hidden md:flex"
+                    data-action="scroll-left"
+                    aria-label="Scroll left">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            
+            <!-- Cards Container -->
+            <div class="flex gap-6 overflow-x-auto pb-4 scroll-smooth hide-scrollbar"
+                 data-element="people-carousel">
+                <!-- Cards injected by JavaScript -->
+            </div>
+            
+            <!-- Scroll Right Button -->
+            <button class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-10 h-10 bg-fz-card/90 hover:bg-fz-accent rounded-full flex items-center justify-center border border-fz-border transition-colors hidden md:flex"
+                    data-action="scroll-right"
+                    aria-label="Scroll right">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+            
+        </div>
+        
+    </div>
+</div>
+
+<!-- Person Card Template -->
+<template data-template="person-card">
+    <article class="flex flex-col items-center flex-shrink-0 w-28 group cursor-pointer"
+             data-element="card"
+             data-id="">
+        
+        <!-- Profile Image Container -->
+        <div class="relative w-24 h-24 rounded-full overflow-hidden bg-fz-card mb-3 ring-2 ring-transparent group-hover:ring-fz-accent transition-all">
+            <img src="" 
+                 alt=""
+                 class="w-full h-full object-cover"
+                 data-element="card-profile"
+                 loading="lazy">
+        </div>
+        
+        <!-- Name -->
+        <h3 class="text-sm font-medium text-white text-center truncate w-full group-hover:text-fz-accent transition-colors"
+            data-element="card-name">
+            Name
+        </h3>
+        
+        <!-- Known For -->
+        <p class="text-xs text-fz-text-muted text-center truncate w-full mt-1"
+           data-element="card-known-for">
+            Acting
+        </p>
+        
+    </article>
+</template>
