@@ -191,7 +191,7 @@ const renderCast = (cast) => {
             <img src="${profileUrl}"
                  alt="${actor.name}"
                  class="w-10 h-10 rounded-full object-cover bg-fz-card">
-            <span class="text-xs text-fz-text-muted text-center w-14 truncate">${actor.name.split(' ')[0]}</span>
+            <span class="text-xs text-fz-text-muted text-center w-12 truncate">${actor.name.split(' ')[0]}</span>
         `;
 
         container.appendChild(item);
