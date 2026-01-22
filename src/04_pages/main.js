@@ -237,7 +237,12 @@ const initializeHoverCard = async (data) => {
         // Append to body (portal pattern)
         const wrapper = document.createElement('div');
         wrapper.innerHTML = template;
-        document.body.appendChild(wrapper.firstElementChild);
+        // Use querySelector to find the actual hover card element,
+        // bypassing any scripts Vite may inject into HTML files
+        const hoverCardEl = wrapper.querySelector('[data-element="hover-card"]');
+        if (hoverCardEl) {
+            document.body.appendChild(hoverCardEl);
+        }
 
         // Initialize with API client and genres
         initHoverCard({
