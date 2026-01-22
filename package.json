@@ -3,10 +3,28 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Fawzi / Patrick",
   "license": "ISC",
-  "description": ""
+  "description": "Eine interaktive Webanwendung für Filmfans, die das Entdecken von Filmen vereinfacht und personalisiert.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fawzi-AI/filmzimmer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Fawzi-AI/filmzimmer/issues"
+  },
+  "homepage": "https://github.com/Fawzi-AI/filmzimmer#readme",
+  "devDependencies": {
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "tailwindcss": "^4.1.18"
+  }
 }

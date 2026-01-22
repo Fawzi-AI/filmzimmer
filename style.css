@@ -1,3 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fz-dark: #0a0a0f;
+  --color-fz-darker: #050508;
+  --color-fz-card: #12121a;
+  --color-fz-border: #1e1e2e;
+  --color-fz-accent: #6366f1;
+  --color-fz-accent-hover: #818cf8;
+  --color-fz-text: #e2e8f0;
+  --color-fz-text-muted: #94a3b8;
+  --font-sans: Inter, system-ui, sans-serif;
+}
+
 /**
  * ============================================================================
  * Filmzimmer Base Styles
