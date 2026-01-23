@@ -28,6 +28,7 @@ import { initMoviesSection } from '../02_components/03-movies-section.js';
 import { initSeriesSection } from '../02_components/04-series-section.js';
 import { initPeopleSection } from '../02_components/05-people-section.js';
 import { initHoverCard } from '../02_components/00-hover-card.js';
+import '../02_components/05_oskar-chat.js';
 
 
 // ============================================================================
