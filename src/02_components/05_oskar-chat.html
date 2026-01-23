@@ -1,0 +1,95 @@
+<!-- Oskar Chat Component -->
+<div data-element="oskar-chat" class="fixed bottom-6 right-6 z-50">
+
+    <!-- Floating Action Button -->
+    <button
+        data-element="oskar-fab"
+        aria-label="Open chat with Oskar"
+        class="w-14 h-14 bg-fz-accent hover:bg-fz-accent-hover rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-fz-accent focus:ring-offset-2 focus:ring-offset-fz-dark"
+    >
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+    </button>
+
+    <!-- Chat Panel -->
+    <div
+        data-element="oskar-panel"
+        class="hidden absolute bottom-20 right-0 w-[380px] max-h-[500px] bg-fz-card rounded-2xl shadow-2xl border border-fz-border flex flex-col overflow-hidden"
+    >
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-fz-border bg-fz-dark/50">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-fz-accent rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-semibold text-fz-text">Oskar</h2>
+                    <p class="text-xs text-fz-text-muted">AI Film Assistant</p>
+                </div>
+            </div>
+            <button
+                data-element="oskar-close"
+                aria-label="Close chat"
+                class="w-8 h-8 rounded-lg hover:bg-fz-border flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-fz-accent"
+            >
+                <svg class="w-5 h-5 text-fz-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Messages Container -->
+        <div
+            data-element="oskar-messages"
+            role="log"
+            aria-live="polite"
+            aria-label="Chat messages"
+            class="flex-1 overflow-y-auto p-4 space-y-3 min-h-[200px] max-h-[340px]"
+        >
+            <!-- Welcome Message -->
+            <div class="flex justify-start">
+                <div class="bg-fz-border text-fz-text px-4 py-2 rounded-2xl rounded-bl-md max-w-[85%] text-sm">
+                    Hi! I'm Oskar, your film assistant. Ask me anything about movies and TV shows!
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div data-element="oskar-loading" class="hidden px-4 pb-2">
+            <div class="flex justify-start">
+                <div class="bg-fz-border px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-1">
+                    <span class="w-2 h-2 bg-fz-text-muted rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+                    <span class="w-2 h-2 bg-fz-text-muted rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+                    <span class="w-2 h-2 bg-fz-text-muted rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-3 border-t border-fz-border bg-fz-dark/30">
+            <div class="flex gap-2">
+                <label for="oskar-input-field" class="sr-only">Type your message</label>
+                <input
+                    data-element="oskar-input"
+                    id="oskar-input-field"
+                    type="text"
+                    placeholder="Ask about movies..."
+                    maxlength="1000"
+                    class="flex-1 bg-fz-dark border border-fz-border rounded-xl px-4 py-2 text-sm text-fz-text placeholder-fz-text-muted focus:outline-none focus:ring-2 focus:ring-fz-accent focus:border-transparent transition-all"
+                >
+                <button
+                    data-element="oskar-send"
+                    aria-label="Send message"
+                    class="w-10 h-10 bg-fz-accent hover:bg-fz-accent-hover rounded-xl flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-fz-accent focus:ring-offset-2 focus:ring-offset-fz-card disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
