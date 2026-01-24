@@ -1,82 +1,82 @@
 <!doctype html>
 <html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Filmzimmer — Journal</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filmzimmer — Journal</title>
 
-  <!-- Tailwind CSS CDN Added By Fawzi-->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Globales Styling (Tailwind Direktiven + globale Styles) -->
-  <link rel="stylesheet" href="./style.css" />
-</head>
+    <!-- Globales Styling -->
+    <link rel="stylesheet" href="./style.css" />
+  </head>
 
-<body class="min-h-screen bg-slate-950 text-slate-100">
-<!-- Navbar wird per Component gerendert -->
-<header id="navbar-root"></header>
+  <body class="min-h-screen bg-slate-950 text-slate-100">
+    <header id="navbar-root"></header>
 
-<main class="mx-auto w-full max-w-6xl px-4 py-8">
-  <div class="mb-8 flex flex-col gap-2">
-    <h1 class="text-3xl font-semibold tracking-tight">Journal</h1>
-    <p class="text-slate-300">
-      Hier findest du deine gespeicherten Favoriten. Du kannst Notizen
-      hinzufügen und verwalten.
-    </p>
-  </div>
+    <main class="mx-auto w-full max-w-6xl px-4 py-8">
+      <div class="mb-8 flex flex-col gap-2">
+        <h1 class="text-3xl font-semibold tracking-tight">Journal</h1>
+        <p class="text-slate-300">
+          Hier findest du deine gespeicherten Favoriten. Du kannst Notizen
+          hinzufügen und verwalten.
+        </p>
+      </div>
 
-  <!-- Status/Info-Bereich (wird durch journal.js befüllt/ausgeblendet) -->
-  <section
-          id="journal-status"
-          class="mb-6 hidden rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-slate-200"
-          aria-live="polite"
-  ></section>
+      <!-- Status/Info-Bereich -->
+      <section
+        id="journal-status"
+        class="mb-6 hidden rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-slate-200"
+        aria-live="polite"
+      ></section>
 
-  <!-- Empty State (wenn keine Favoriten vorhanden sind) -->
-  <section
-          id="empty-state"
-          class="hidden rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-10 text-center"
-  >
-    <h2 class="text-xl font-semibold">Noch keine Favoriten gespeichert</h2>
-    <p class="mt-2 text-slate-300">
-      Gehe zur Startseite und füge Filme zu deinen Favoriten hinzu. Danach
-      werden sie hier angezeigt.
-    </p>
-    <a
-            href="./index.html"
-            class="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-900 hover:bg-white"
+      <!-- Empty State -->
+      <section
+        id="empty-state"
+        class="hidden rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-10 text-center"
+      >
+        <h2 class="text-xl font-semibold">Noch keine Favoriten gespeichert</h2>
+        <p class="mt-2 text-slate-300">
+          Gehe zur Startseite und füge Filme zu deinen Favoriten hinzu. Danach
+          werden sie hier angezeigt.
+        </p>
+        <a
+          href="./index.html"
+          class="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-900 hover:bg-white"
+        >
+          Zur Startseite
+        </a>
+      </section>
+
+      <!-- Grid -->
+      <section>
+        <div class="mb-4 flex items-end justify-between gap-4">
+          <h2 class="text-lg font-semibold text-slate-100">Deine Favoriten</h2>
+          <div id="journal-actions" class="flex items-center gap-2"></div>
+        </div>
+
+        <div
+          id="favourites-grid"
+          class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          aria-label="Favoriten Filme"
+        ></div>
+      </section>
+    </main>
+
+    <footer
+      class="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 text-sm text-slate-500"
     >
-      Zur Startseite
-    </a>
-  </section>
+      <p>Filmzimmer — Movie Diary</p>
+    </footer>
 
-  <!-- Grid für Favoriten-Filme (Cards werden via journal.js gerendert) -->
-  <section>
-    <div class="mb-4 flex items-end justify-between gap-4">
-      <h2 class="text-lg font-semibold text-slate-100">Deine Favoriten</h2>
+    <!-- Navbar -->
+    <script
+      type="module"
+      src="./src/02_components/01_navbar-loader.js"
+    ></script>
 
-      <!-- Optional: Platz für spätere Controls (Sort/Filter) -->
-      <div id="journal-actions" class="flex items-center gap-2"></div>
-    </div>
-
-    <div
-            id="favourites-grid"
-            class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-            aria-label="Favoriten Filme"
-    ></div>
-  </section>
-</main>
-
-<footer
-        class="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 text-sm text-slate-500"
->
-  <p>Filmzimmer — Movie Diary</p>
-</footer>
-
-<!-- Navbar Component Added By Fawzi -->
-<script type="module" src="./src/02_components/01_navbar-loader.js"></script>
-
-<!-- Journal Page Logic  -->
-<script type="module" src="./src/pages/journal.js"></script>
-</body>
+    <!-- Journal Logik -->
+    <script type="module" src="./src/04_pages/journal.js"></script>
+  </body>
 </html>
