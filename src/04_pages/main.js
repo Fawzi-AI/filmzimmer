@@ -28,6 +28,7 @@ import { initMoviesSection } from '../02_components/03-movies-section.js';
 import { initSeriesSection } from '../02_components/04-series-section.js';
 import { initPeopleSection } from '../02_components/05-people-section.js';
 import { initHoverCard } from '../02_components/00-hover-card.js';
+import { initNavbar } from '../02_components/01_navbar.js';
 
 
 // ============================================================================
@@ -44,6 +45,7 @@ const APP_CONFIG = Object.freeze({
     tmdbApiKey: 'e4a2397077d9e2b4dda4b52d14c6e96a',
 
     mountPoints: {
+        navbar: '#mount-navbar',
         loading: '#loading-indicator',
         hero: '#mount-hero',
         trending: '#mount-trending',
@@ -53,6 +55,7 @@ const APP_CONFIG = Object.freeze({
     },
 
     templatePaths: {
+        navbar: './src/02_components/01_navbar.html',
         hero: './src/02_components/01-hero-section.html',
         trending: './src/02_components/02-trending-section.html',
         movies: './src/02_components/03-movies-section.html',
@@ -61,6 +64,35 @@ const APP_CONFIG = Object.freeze({
         hoverCard: './src/02_components/00-hover-card.html',
     },
 });
+
+
+// ============================================================================
+// NAVBAR INITIALIZATION
+// ============================================================================
+
+/**
+ * Initializes the navbar component
+ * Called early in bootstrap to show navbar immediately
+ */
+const initializeNavbar = async () => {
+    try {
+        const container = document.querySelector(APP_CONFIG.mountPoints.navbar);
+        if (!container) {
+            console.warn(`[${APP_CONFIG.name}] Navbar mount point not found`);
+            return;
+        }
+
+        const template = await loadTemplate(APP_CONFIG.templatePaths.navbar);
+        container.innerHTML = template;
+
+        initNavbar(container);
+
+        console.info(`[${APP_CONFIG.name}] Navbar initialized`);
+
+    } catch (error) {
+        console.warn(`[${APP_CONFIG.name}] Failed to initialize navbar:`, error);
+    }
+};
 
 
 // ============================================================================
@@ -288,6 +320,9 @@ const handleFatalError = (message) => {
  */
 const bootstrap = async () => {
     console.info(`[${APP_CONFIG.name}] Starting v${APP_CONFIG.version}`);
+
+    // Initialize navbar first (shows immediately while data loads)
+    await initializeNavbar();
 
     const apiReady = initializeApiClient();
     if (!apiReady) {
