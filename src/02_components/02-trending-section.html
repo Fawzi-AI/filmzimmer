@@ -48,10 +48,11 @@
 
 <!-- Card Template (Hidden, cloned by JS) -->
 <template data-template="trending-card">
-    <article class="flex-shrink-0 w-44 group cursor-pointer"
+    <article class="flex-shrink-0 w-44 group cursor-pointer transition-all duration-300 data-[favourited=true]:drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]"
              data-element="card"
              data-id=""
-             data-type="">
+             data-type=""
+             data-favourited="false">
         
         <!-- Poster Container -->
         <div class="relative aspect-[2/3] rounded-xl overflow-hidden bg-fz-card mb-3">

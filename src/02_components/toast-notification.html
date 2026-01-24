@@ -1,0 +1,14 @@
+<!-- Toast Notification Container -->
+<div id="toast-container"
+     class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+    <!-- Toasts injected by JavaScript -->
+</div>
+
+<!-- Toast Template -->
+<template data-template="toast">
+    <div class="toast-item pointer-events-auto px-4 py-3 bg-fz-card/95 backdrop-blur-sm border border-fz-border rounded-lg shadow-lg transform translate-x-full opacity-0 transition-all duration-300 ease-out"
+         data-element="toast"
+         role="alert">
+        <p class="text-sm text-white" data-element="toast-message">Message</p>
+    </div>
+</template>

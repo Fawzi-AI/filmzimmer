@@ -25,10 +25,11 @@
 
 <!-- Series Card Template -->
 <template data-template="series-card">
-    <article class="group cursor-pointer"
+    <article class="group cursor-pointer transition-all duration-300 data-[favourited=true]:drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]"
              data-element="card"
              data-id=""
-             data-type="tv">
+             data-type="tv"
+             data-favourited="false">
         
         <!-- Poster Container -->
         <div class="relative aspect-[2/3] rounded-xl overflow-hidden bg-fz-card mb-3">
