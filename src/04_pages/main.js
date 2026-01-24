@@ -29,6 +29,7 @@ import { initSeriesSection } from '../02_components/04-series-section.js';
 import { initPeopleSection } from '../02_components/05-people-section.js';
 import { initHoverCard } from '../02_components/00-hover-card.js';
 import { initNavbar } from '../02_components/01_navbar.js';
+import { initToast } from '../02_components/toast-notification.js';
 
 
 // ============================================================================
@@ -62,6 +63,7 @@ const APP_CONFIG = Object.freeze({
         series: './src/02_components/04-series-section.html',
         people: './src/02_components/05-people-section.html',
         hoverCard: './src/02_components/00-hover-card.html',
+        toast: './src/02_components/toast-notification.html',
     },
 });
 
@@ -286,6 +288,40 @@ const initializeHoverCard = async (data) => {
 
 
 // ============================================================================
+// TOAST INITIALIZATION
+// ============================================================================
+
+/**
+ * Initializes the toast notification component
+ */
+const initializeToast = async () => {
+    try {
+        const template = await loadTemplate(APP_CONFIG.templatePaths.toast);
+
+        // Append to body (portal pattern)
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = template;
+
+        // Get container and template elements
+        const container = wrapper.querySelector('#toast-container');
+        const toastTemplate = wrapper.querySelector('[data-template="toast"]');
+
+        if (container) {
+            document.body.appendChild(container);
+        }
+
+        // Initialize toast system
+        initToast(container, toastTemplate);
+
+        console.info(`[${APP_CONFIG.name}] Toast notifications initialized`);
+
+    } catch (error) {
+        console.warn(`[${APP_CONFIG.name}] Failed to initialize toast:`, error);
+    }
+};
+
+
+// ============================================================================
 // ERROR HANDLING
 // ============================================================================
 
@@ -334,6 +370,8 @@ const bootstrap = async () => {
         const data = await fetchInitialData();
 
         hideElement(document.querySelector(APP_CONFIG.mountPoints.loading));
+
+        await initializeToast();
 
         await initializeHoverCard(data);
 

@@ -12,6 +12,8 @@
 
 import { select, selectAll, setText, setAttribute } from '../01_utils/dom-loader.js';
 import { registerContainer } from './00-hover-card.js';
+import { addFavourite, removeFavourite, isFavourite } from '../01_utils/storage-manager.js';
+import { showToast } from './toast-notification.js';
 
 
 // ============================================================================
@@ -54,6 +56,7 @@ const createCardElement = (item, apiClient, template) => {
     // Base data attributes
     setAttribute(card, 'data-id', item.id);
     setAttribute(card, 'data-type', mediaType);
+    setAttribute(card, 'data-favourited', isFavourite(item.id) ? 'true' : 'false');
 
     // Hover card data attributes
     setAttribute(card, 'data-title', title);
@@ -152,27 +155,42 @@ const setupCardClickHandlers = (container) => {
     carousel.addEventListener('click', (event) => {
         const card = event.target.closest('[data-element="card"]');
         if (!card) return;
-        
-        const id = card.dataset.id;
-        const mediaType = card.dataset.type;
-        
-        if (id && mediaType) {
-            handleCardClick(parseInt(id, 10), mediaType);
-        }
+
+        toggleFavourite(card);
     });
 };
 
 /**
- * Handles card click event
- * @param {number} id - Item ID
- * @param {string} mediaType - Media type
+ * Toggles favourite state for a trending card
+ * @param {HTMLElement} card - Card element
  */
-const handleCardClick = (id, mediaType) => {
-    console.info(`[Trending] Card clicked: ${mediaType}/${id}`);
-    
-    window.dispatchEvent(new CustomEvent('filmzimmer:view-details', {
-        detail: { id, mediaType }
-    }));
+const toggleFavourite = (card) => {
+    const id = parseInt(card.dataset.id, 10);
+    const title = card.dataset.title || 'Unknown';
+    const mediaType = card.dataset.type || 'movie';
+    const currentlyFavourited = card.dataset.favourited === 'true';
+
+    if (currentlyFavourited) {
+        removeFavourite(id);
+        setAttribute(card, 'data-favourited', 'false');
+        showToast(`${title} removed from favorites`);
+        console.info(`[Trending] Removed from favorites: ${title}`);
+    } else {
+        const itemData = {
+            id,
+            title,
+            name: mediaType === 'tv' ? title : undefined,
+            poster_path: card.querySelector('[data-element="card-poster"]')?.src || null,
+            overview: card.dataset.overview || '',
+            release_date: mediaType === 'movie' ? card.dataset.year : undefined,
+            first_air_date: mediaType === 'tv' ? card.dataset.year : undefined,
+            vote_average: parseFloat(card.dataset.rating) || null,
+        };
+        addFavourite(itemData);
+        setAttribute(card, 'data-favourited', 'true');
+        showToast(`${title} added to favorites`);
+        console.info(`[Trending] Added to favorites: ${title}`);
+    }
 };
 
 
