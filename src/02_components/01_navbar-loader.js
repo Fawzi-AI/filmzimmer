@@ -3,105 +3,72 @@
  * Navbar Loader (Self-Initializing)
  * ============================================================================
  *
- * This script automatically loads and initializes the navbar component.
- * It can be included in any page with a single script tag.
- *
- * Usage in journal.html:
- * <script type="module" src="./src/02_components/01_navbar-loader.js"></script>
- *
- * The script will:
- * 1. Find the navbar mount point (#navbar-root or #mount-navbar)
- * 2. Fetch the navbar HTML template
- * 3. Initialize the navbar component
- *
- * @module navbar-loader
- * @author Fawzi
+ * Loads navbar template and initializes navbar logic on any page.
+ * Ensures TMDB client is initialized even on pages without main.js (e.g. journal.html).
  */
 
-import { initNavbar } from './01_navbar.js';
+import { initNavbar } from "./01_navbar.js";
+import TMDBClient from "../03_api/tmdb-client.js";
+import { APP_CONFIG } from "../00_config/app-config.js";
 
+const MOUNT_POINT_SELECTORS = [
+  APP_CONFIG.mountPoints.navbarAlt, // #navbar-root (journal)
+  APP_CONFIG.mountPoints.navbar, // #mount-navbar (index)
+];
 
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
+const TEMPLATE_PATH = APP_CONFIG.templatePaths.navbar;
 
-const MOUNT_POINT_SELECTORS = ['#navbar-root', '#mount-navbar'];
-const TEMPLATE_PATH = './src/02_components/01_navbar.html';
-
-
-// ============================================================================
-// MOUNT POINT DETECTION
-// ============================================================================
-
-/**
- * Finds the first available navbar mount point
- * @returns {HTMLElement|null} Mount point element or null
- */
 const findMountPoint = () => {
-    for (const selector of MOUNT_POINT_SELECTORS) {
-        const element = document.querySelector(selector);
-        if (element) {
-            return element;
-        }
-    }
-    return null;
+  for (const selector of MOUNT_POINT_SELECTORS) {
+    const element = document.querySelector(selector);
+    if (element) return element;
+  }
+  return null;
 };
 
-
-// ============================================================================
-// TEMPLATE LOADING
-// ============================================================================
-
-/**
- * Fetches the navbar HTML template
- * @returns {Promise<string>} Template HTML content
- */
 const fetchTemplate = async () => {
-    const response = await fetch(TEMPLATE_PATH);
-
-    if (!response.ok) {
-        throw new Error(`Failed to load navbar template: ${response.status}`);
-    }
-
-    return response.text();
+  const response = await fetch(TEMPLATE_PATH);
+  if (!response.ok) {
+    throw new Error(`Failed to load navbar template: ${response.status}`);
+  }
+  return response.text();
 };
 
+const ensureApiReady = () => {
+  try {
+    if (!TMDBClient.isReady()) {
+      TMDBClient.initialize(APP_CONFIG.tmdbApiKey);
+      console.info("[NavbarLoader] TMDB client initialized (via app-config)");
+    }
+  } catch (e) {
+    console.warn("[NavbarLoader] TMDB init failed:", e);
+  }
+};
 
-// ============================================================================
-// INITIALIZATION
-// ============================================================================
-
-/**
- * Loads and initializes the navbar
- */
 const loadNavbar = async () => {
-    try {
-        const container = findMountPoint();
-
-        if (!container) {
-            console.warn('[NavbarLoader] No mount point found');
-            return;
-        }
-
-        const template = await fetchTemplate();
-        container.innerHTML = template;
-
-        initNavbar(container);
-
-        console.info('[NavbarLoader] Navbar loaded successfully');
-
-    } catch (error) {
-        console.error('[NavbarLoader] Failed to load navbar:', error);
+  try {
+    const container = findMountPoint();
+    if (!container) {
+      console.warn("[NavbarLoader] No mount point found");
+      return;
     }
+
+    // Make sure search can work on pages without main.js
+    ensureApiReady();
+
+    const template = await fetchTemplate();
+    container.innerHTML = template;
+
+    initNavbar(container);
+
+    console.info("[NavbarLoader] Navbar loaded successfully");
+  } catch (error) {
+    console.error("[NavbarLoader] Failed to load navbar:", error);
+  }
 };
 
-
-// ============================================================================
-// AUTO-INITIALIZATION
-// ============================================================================
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadNavbar);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", loadNavbar);
 } else {
-    loadNavbar();
+  loadNavbar();
 }
