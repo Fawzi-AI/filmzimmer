@@ -169,7 +169,11 @@ const renderResultsList = (dropdown, results, opts = {}) => {
           data-type="${item.mediaType}"
         >
           <div class="h-10 w-10 shrink-0 rounded-lg bg-slate-900/60 overflow-hidden flex items-center justify-center">
-            ${img ? `<img src="${img}" alt="" class="h-full w-full object-cover">` : `<span class="text-xs text-slate-500">No</span>`}
+            ${
+              img
+                ? `<img src="${img}" alt="" class="h-full w-full object-cover">`
+                : `<span class="text-xs text-slate-500">No</span>`
+            }
           </div>
 
           <div class="min-w-0 flex-1">
@@ -225,7 +229,11 @@ const renderPreview = (dropdown, inputEl, item) => {
     <div class="p-4">
       <div class="flex gap-4">
         <div class="h-28 w-20 shrink-0 rounded-xl bg-slate-900/60 overflow-hidden flex items-center justify-center">
-          ${img ? `<img src="${img}" alt="" class="h-full w-full object-cover">` : `<span class="text-xs text-slate-500">Kein Poster</span>`}
+          ${
+            img
+              ? `<img src="${img}" alt="" class="h-full w-full object-cover">`
+              : `<span class="text-xs text-slate-500">Kein Poster</span>`
+          }
         </div>
 
         <div class="min-w-0 flex-1">
@@ -295,6 +303,12 @@ const setupSearch = (container) => {
   let debounceTimer = null;
   let queryToken = 0;
 
+  // VIEW STATE (Fix für Bug nach Scroll + Auswahl)
+  // "list" -> Trefferliste (scroll/loadMore erlaubt)
+  // "preview" -> Detailkarte (scroll/loadMore blockieren!)
+  // "closed" -> dropdown zu
+  let viewMode = "closed";
+
   // TMDB state (home only)
   let currentQuery = "";
   let currentPage = 1;
@@ -323,6 +337,37 @@ const setupSearch = (container) => {
     items.forEach((item) => resultsByKey.set(keyOf(item), item));
   };
 
+  // Wrapped render helpers to maintain viewMode
+  const showList = (items, opts = {}) => {
+    viewMode = "list";
+    renderResultsList(dropdown, items, opts);
+  };
+
+  const showPreview = (item) => {
+    viewMode = "preview";
+    renderPreview(dropdown, input, item);
+  };
+
+  const close = () => {
+    viewMode = "closed";
+    closeDropdown(dropdown);
+  };
+
+  const showLoading = (text = "Suche…") => {
+    viewMode = "list";
+    renderLoading(dropdown, text);
+  };
+
+  const showEmpty = (q, mode) => {
+    viewMode = "list";
+    renderEmpty(dropdown, q, mode);
+  };
+
+  const showErr = (text) => {
+    viewMode = "list";
+    renderError(dropdown, text);
+  };
+
   // -------------------------
   // JOURNAL: local favourites search
   // -------------------------
@@ -330,7 +375,6 @@ const setupSearch = (container) => {
     resetState();
 
     const favs = (getFavourites() || []).map(normalizeFavourite);
-
     const query = q.trim().toLowerCase();
     const filtered = favs.filter((f) =>
       (f.title || "").toLowerCase().includes(query),
@@ -339,11 +383,11 @@ const setupSearch = (container) => {
     mergeResults(filtered);
 
     if (filtered.length === 0) {
-      renderEmpty(dropdown, q, "favs");
+      showEmpty(q, "favs");
       return;
     }
 
-    renderResultsList(dropdown, filtered, {
+    showList(filtered, {
       hasMore: false,
       footerLeft: `${filtered.length} Favorit${filtered.length === 1 ? "" : "en"}`,
       footerRight: "Gefiltert aus Favoriten",
@@ -355,16 +399,18 @@ const setupSearch = (container) => {
   // -------------------------
   const fetchPage = async ({ query, page, token, mode }) => {
     if (!TMDBClient.isReady()) {
-      renderError(
-        dropdown,
-        "Suche ist nicht verfügbar (API nicht initialisiert).",
-      );
+      showErr("Suche ist nicht verfügbar (API nicht initialisiert).");
       return;
     }
 
     try {
       const res = await TMDBClient.searchMulti(query, { page });
+
+      // Token check: verhindert späte Responses, die Preview überschreiben
       if (token !== queryToken) return;
+
+      // Wenn inzwischen Preview offen ist: nichts mehr rendern
+      if (viewMode !== "list") return;
 
       const normalized = (res?.results || [])
         .filter((r) => r && (r.media_type === "movie" || r.media_type === "tv"))
@@ -377,17 +423,17 @@ const setupSearch = (container) => {
 
       const list = getResultsArray();
       if (mode === "first" && list.length === 0) {
-        renderEmpty(dropdown, query, "tmdb");
+        showEmpty(query, "tmdb");
         return;
       }
 
-      renderResultsList(dropdown, list, {
+      showList(list, {
         isLoadingMore,
         hasMore: hasMore(),
       });
     } catch (e) {
       console.warn("[NavbarSearch] search failed:", e);
-      renderError(dropdown);
+      showErr();
     }
   };
 
@@ -398,15 +444,17 @@ const setupSearch = (container) => {
     resetState();
     currentQuery = query;
 
-    renderLoading(dropdown, "Suche…");
+    showLoading("Suche…");
     await fetchPage({ query, page: 1, token, mode: "first" });
   };
 
   const loadMore = async () => {
+    // Wichtig: Nur in List-View nachladen
+    if (viewMode !== "list") return;
     if (!hasMore() || isLoadingMore) return;
 
     isLoadingMore = true;
-    renderResultsList(dropdown, getResultsArray(), {
+    showList(getResultsArray(), {
       isLoadingMore: true,
       hasMore: true,
     });
@@ -422,7 +470,11 @@ const setupSearch = (container) => {
     });
 
     isLoadingMore = false;
-    renderResultsList(dropdown, getResultsArray(), {
+
+    // Wenn währenddessen Preview geöffnet wurde: nicht zurück in Liste rendern
+    if (viewMode !== "list") return;
+
+    showList(getResultsArray(), {
       isLoadingMore: false,
       hasMore: hasMore(),
     });
@@ -434,7 +486,7 @@ const setupSearch = (container) => {
 
     if (q.length < SEARCH.minChars) {
       resetState();
-      closeDropdown(dropdown);
+      close();
       return;
     }
 
@@ -451,6 +503,8 @@ const setupSearch = (container) => {
 
   // Dropdown scroll -> load more (home only)
   dropdown.addEventListener("scroll", () => {
+    // Fix: Während Preview offen ist, darf Scroll kein loadMore triggern
+    if (viewMode !== "list") return;
     if (!hasMore() || isLoadingMore) return;
 
     const remaining =
@@ -469,7 +523,8 @@ const setupSearch = (container) => {
     const jumpFavBtn = e.target.closest('[data-action="preview-jump-fav"]');
 
     if (backBtn) {
-      renderResultsList(dropdown, getResultsArray(), {
+      // Restore current list view (nur wenn wir Results haben)
+      showList(getResultsArray(), {
         isLoadingMore,
         hasMore: hasMore(),
         footerLeft: isJournal ? `${getResultsArray().length} Favoriten` : null,
@@ -483,7 +538,7 @@ const setupSearch = (container) => {
       if (!id) return;
 
       const modeNow = detectCurrentPage();
-      closeDropdown(dropdown);
+      close();
 
       if (modeNow === "journal") {
         const target = document.querySelector(`#fav-${id}`);
@@ -505,6 +560,16 @@ const setupSearch = (container) => {
     }
 
     if (selectBtn) {
+      // FIX: pending debounce + in-flight TMDB responses dürfen Preview nicht überschreiben
+      if (debounceTimer) {
+        window.clearTimeout(debounceTimer);
+        debounceTimer = null;
+      }
+      queryToken += 1; // invalidiert laufende fetchPage()-Responses
+
+      // Zusätzlich: während Preview offen ist, darf kein loadMore mehr laufen
+      isLoadingMore = false;
+
       const key = selectBtn.dataset.key;
       let item = resultsByKey.get(key);
 
@@ -519,7 +584,7 @@ const setupSearch = (container) => {
       }
       if (!item) return;
 
-      renderPreview(dropdown, input, item);
+      showPreview(item);
       return;
     }
 
@@ -535,8 +600,8 @@ const setupSearch = (container) => {
         toggleFavBtn.textContent = "Zu Favoriten";
         showToast(`${item.title} entfernt`);
 
-        // Preview neu rendern, damit "Im Journal anzeigen" ggf. verschwindet
-        renderPreview(dropdown, input, item);
+        // Preview neu rendern, damit "Im Journal anzeigen" ggf. verschwindet (Home)
+        showPreview(item);
 
         if (isJournal) {
           const q = input.value.trim();
@@ -561,7 +626,7 @@ const setupSearch = (container) => {
         showToast(`${item.title} zu Favoriten hinzugefügt`);
 
         // Preview neu rendern, damit "Im Journal anzeigen" erscheint (Home)
-        renderPreview(dropdown, input, item);
+        showPreview(item);
 
         if (isJournal) {
           const q = input.value.trim();
@@ -572,31 +637,45 @@ const setupSearch = (container) => {
   });
 
   /**
-   * Outside click closes dropdown (robust)
+   * Outside close:
+   * - pointerdown statt click, damit nach Re-Render im dropdown kein
+   *   "späterer click" die Preview schließt.
    */
-  document.addEventListener("click", (e) => {
+  document.addEventListener("pointerdown", (e) => {
     const path = typeof e.composedPath === "function" ? e.composedPath() : [];
     const isInside =
       path.includes(container) ||
       path.includes(dropdown) ||
       path.includes(input);
 
-    if (!isInside) closeDropdown(dropdown);
+    if (!isInside) close();
   });
 
+  // Escape closes
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeDropdown(dropdown);
+    if (e.key === "Escape") close();
   });
 
+  // Focus keeps dropdown open if it has content
   input.addEventListener("focus", () => {
     if (dropdown.innerHTML.trim()) openDropdown(dropdown);
   });
 
+  // Enter -> preview first item if available
   input.addEventListener("keydown", (e) => {
     if (e.key !== "Enter") return;
     const list = getResultsArray();
     if (!list.length) return;
-    renderPreview(dropdown, input, list[0]);
+
+    // FIX analog: debounce + in-flight invalidieren
+    if (debounceTimer) {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+    queryToken += 1;
+
+    isLoadingMore = false;
+    showPreview(list[0]);
   });
 };
 
