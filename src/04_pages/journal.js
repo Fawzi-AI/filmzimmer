@@ -91,6 +91,26 @@ function buildPoster(posterPathOrUrl, title) {
   `;
 }
 
+/**
+ * Scrollt zur Favoriten-Card, wenn ein Hash wie #fav-123 vorhanden ist.
+ * Optionales Highlight, damit der Nutzer sofort sieht, wo er gelandet ist.
+ */
+function scrollToFavouriteFromHash() {
+  const hash = (window.location.hash || "").trim();
+  if (!hash.startsWith("#fav-")) return;
+
+  const el = document.querySelector(hash);
+  if (!el) return;
+
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  // kurzes Highlight (Tailwind utility Klassen)
+  el.classList.add("ring-2", "ring-slate-500");
+  window.setTimeout(() => {
+    el.classList.remove("ring-2", "ring-slate-500");
+  }, 1200);
+}
+
 function createCard(item) {
   const title = item.title || item.name || "Unbekannter Titel";
   const year = formatYear(item.release_date || item.first_air_date);
@@ -105,6 +125,11 @@ function createCard(item) {
   const card = document.createElement("article");
   card.className =
     "rounded-2xl border border-slate-800 bg-slate-900/30 p-4 shadow-sm backdrop-blur";
+
+  // >>> Sprungmarke für Direktnavigation (journal.html#fav-<id>)
+  card.id = `fav-${item.id}`;
+  card.dataset.favId = String(item.id);
+  // <<<
 
   card.innerHTML = `
     <div class="flex flex-col gap-4">
@@ -201,6 +226,10 @@ function render() {
   for (const item of favs) {
     grid.appendChild(createCard(item));
   }
+
+  // >>> nach Rendern ggf. zum Hash-Favoriten springen
+  scrollToFavouriteFromHash();
+  // <<<
 }
 
 // Initial render
@@ -210,3 +239,9 @@ render();
 window.addEventListener("storage", (e) => {
   if (e.key === "filmzimmer:favourites") render();
 });
+
+// >>> auch reagieren, wenn der Hash nachträglich gesetzt wird (z.B. durch Navbar)
+window.addEventListener("hashchange", () => {
+  scrollToFavouriteFromHash();
+});
+// <<<
