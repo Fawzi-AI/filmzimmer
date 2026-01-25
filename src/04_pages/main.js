@@ -31,6 +31,9 @@ import { initHoverCard } from '../02_components/00-hover-card.js';
 import { initNavbar } from '../02_components/01_navbar.js';
 import { initToast } from '../02_components/toast-notification.js';
 
+// Oskar Chat - Self-initializing module (bootstraps on import)
+import '../02_components/05_oskar-chat.js';
+
 
 // ============================================================================
 // CONFIGURATION
@@ -271,7 +274,13 @@ const initializeHoverCard = async (data) => {
         // Append to body (portal pattern)
         const wrapper = document.createElement('div');
         wrapper.innerHTML = template;
-        document.body.appendChild(wrapper.firstElementChild);
+        
+        // Use querySelector to find the actual hover card element,
+        // bypassing any scripts Vite may inject into HTML files
+        const hoverCardEl = wrapper.querySelector('[data-element="hover-card"]');
+        if (hoverCardEl) {
+            document.body.appendChild(hoverCardEl);
+        }
 
         // Initialize with API client and genres
         initHoverCard({
@@ -371,13 +380,19 @@ const bootstrap = async () => {
 
         hideElement(document.querySelector(APP_CONFIG.mountPoints.loading));
 
+        // Initialize toast notifications
         await initializeToast();
 
+        // Initialize hover card
         await initializeHoverCard(data);
 
+        // Initialize all page sections
         await initializeSections(data);
 
+        // Expose application state globally
         exposeApplicationState(data);
+
+        // Note: Oskar Chat self-initializes via the import at the top of this file
 
         console.info(`[${APP_CONFIG.name}] Application ready`);
 

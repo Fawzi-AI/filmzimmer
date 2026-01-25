@@ -1,3 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fz-dark: #0a0a0f;
+  --color-fz-darker: #050508;
+  --color-fz-card: #12121a;
+  --color-fz-border: #1e1e2e;
+  --color-fz-accent: #6366f1;
+  --color-fz-accent-hover: #818cf8;
+  --color-fz-text: #e2e8f0;
+  --color-fz-text-muted: #94a3b8;
+  --font-sans: Inter, system-ui, sans-serif;
+}
+
 /**
  * ============================================================================
  * Filmzimmer Base Styles
@@ -146,4 +160,51 @@ html {
 
 .hover-card-cast-item:hover img {
     border-color: #6366f1;
+}
+
+/* Cast skeleton (generates 5 items via CSS) */
+/* Note: display:flex and gap are handled by Tailwind classes in HTML */
+/* This allows the 'hidden' class to properly hide the skeleton */
+
+.hover-card-cast-skeleton::before {
+    content: '';
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+    height: 56px;
+    background:
+        /* Item 1 - circle */
+        radial-gradient(circle at 20px 20px, #1e1e2e 20px, transparent 20px),
+        /* Item 1 - name bar */
+        linear-gradient(#1e1e2e 8px, transparent 8px),
+        /* Item 2 - circle */
+        radial-gradient(circle at 76px 20px, #1e1e2e 20px, transparent 20px),
+        /* Item 2 - name bar */
+        linear-gradient(#1e1e2e 8px, transparent 8px),
+        /* Item 3 - circle */
+        radial-gradient(circle at 132px 20px, #1e1e2e 20px, transparent 20px),
+        /* Item 3 - name bar */
+        linear-gradient(#1e1e2e 8px, transparent 8px),
+        /* Item 4 - circle */
+        radial-gradient(circle at 188px 20px, #1e1e2e 20px, transparent 20px),
+        /* Item 4 - name bar */
+        linear-gradient(#1e1e2e 8px, transparent 8px),
+        /* Item 5 - circle */
+        radial-gradient(circle at 244px 20px, #1e1e2e 20px, transparent 20px),
+        /* Item 5 - name bar */
+        linear-gradient(#1e1e2e 8px, transparent 8px);
+    background-size:
+        40px 40px, 48px 8px,
+        40px 40px, 48px 8px,
+        40px 40px, 48px 8px,
+        40px 40px, 48px 8px,
+        40px 40px, 48px 8px;
+    background-position:
+        0 0, 0 48px,
+        56px 0, 52px 48px,
+        112px 0, 108px 48px,
+        168px 0, 164px 48px,
+        224px 0, 220px 48px;
+    background-repeat: no-repeat;
+    animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
