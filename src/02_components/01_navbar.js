@@ -204,9 +204,22 @@ const renderResultsList = (dropdown, results, opts = {}) => {
   openDropdown(dropdown);
 };
 
+/**
+ * Preview:
+ * - Button 1 (rechts oben): Favorit togglen
+ * - Button 2 (unten rechts):
+ *   - Journal-Seite: "In Liste anzeigen" (scrollt zur Card)
+ *   - Home-Seite: nur wenn bereits Favorit -> "Im Journal anzeigen" (öffnet journal.html#fav-id)
+ */
 const renderPreview = (dropdown, inputEl, item) => {
   const img = item.poster_path ? posterUrl(item.poster_path, "w342") : null;
   const fav = isFavourite(item.id);
+
+  const pageMode = detectCurrentPage();
+  const isJournal = pageMode === "journal";
+
+  const jumpLabel = isJournal ? "In Liste anzeigen" : "Im Journal anzeigen";
+  const showJumpButton = isJournal ? true : fav; // Home: nur anzeigen wenn bereits Favorit
 
   dropdown.innerHTML = `
     <div class="p-4">
@@ -247,12 +260,20 @@ const renderPreview = (dropdown, inputEl, item) => {
               Zurück zur Liste
             </button>
 
-            <a
-              href="./journal.html"
-              class="rounded-xl border border-slate-700 bg-slate-950/40 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-950/70"
-            >
-              Journal öffnen
-            </a>
+            ${
+              showJumpButton
+                ? `
+                  <button
+                    type="button"
+                    class="rounded-xl border border-slate-700 bg-slate-950/40 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-950/70"
+                    data-action="preview-jump-fav"
+                    data-id="${item.id}"
+                  >
+                    ${jumpLabel}
+                  </button>
+                `
+                : ""
+            }
           </div>
         </div>
       </div>
@@ -445,15 +466,41 @@ const setupSearch = (container) => {
     const selectBtn = e.target.closest('[data-action="search-select"]');
     const backBtn = e.target.closest('[data-action="preview-back"]');
     const toggleFavBtn = e.target.closest('[data-action="preview-toggle-fav"]');
+    const jumpFavBtn = e.target.closest('[data-action="preview-jump-fav"]');
 
     if (backBtn) {
-      // Restore current list view
       renderResultsList(dropdown, getResultsArray(), {
         isLoadingMore,
         hasMore: hasMore(),
         footerLeft: isJournal ? `${getResultsArray().length} Favoriten` : null,
         footerRight: isJournal ? "Gefiltert aus Favoriten" : null,
       });
+      return;
+    }
+
+    if (jumpFavBtn) {
+      const id = Number(jumpFavBtn.dataset.id);
+      if (!id) return;
+
+      const modeNow = detectCurrentPage();
+      closeDropdown(dropdown);
+
+      if (modeNow === "journal") {
+        const target = document.querySelector(`#fav-${id}`);
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          target.classList.add("ring-2", "ring-slate-500");
+          window.setTimeout(() => {
+            target.classList.remove("ring-2", "ring-slate-500");
+          }, 1200);
+        } else {
+          window.location.hash = `fav-${id}`;
+        }
+      } else {
+        // Home: Button wird nur gerendert, wenn fav==true, daher ist Sprung sinnvoll.
+        window.location.href = `./journal.html#fav-${id}`;
+      }
+
       return;
     }
 
@@ -488,7 +535,9 @@ const setupSearch = (container) => {
         toggleFavBtn.textContent = "Zu Favoriten";
         showToast(`${item.title} entfernt`);
 
-        // Journal: nach Entfernen sofort Liste aktualisieren (weil lokale Quelle)
+        // Preview neu rendern, damit "Im Journal anzeigen" ggf. verschwindet
+        renderPreview(dropdown, input, item);
+
         if (isJournal) {
           const q = input.value.trim();
           if (q.length >= SEARCH.minChars) runFavouritesSearch(q);
@@ -511,7 +560,9 @@ const setupSearch = (container) => {
         toggleFavBtn.textContent = "Entfernen";
         showToast(`${item.title} zu Favoriten hinzugefügt`);
 
-        // Journal: nach Hinzufügen (kommt i.d.R. nicht vor), aber sicherheitshalber refresh
+        // Preview neu rendern, damit "Im Journal anzeigen" erscheint (Home)
+        renderPreview(dropdown, input, item);
+
         if (isJournal) {
           const q = input.value.trim();
           if (q.length >= SEARCH.minChars) runFavouritesSearch(q);
@@ -520,23 +571,27 @@ const setupSearch = (container) => {
     }
   });
 
-  // Outside click closes dropdown
+  /**
+   * Outside click closes dropdown (robust)
+   */
   document.addEventListener("click", (e) => {
-    const isInside = container.contains(e.target);
+    const path = typeof e.composedPath === "function" ? e.composedPath() : [];
+    const isInside =
+      path.includes(container) ||
+      path.includes(dropdown) ||
+      path.includes(input);
+
     if (!isInside) closeDropdown(dropdown);
   });
 
-  // Escape closes
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeDropdown(dropdown);
   });
 
-  // Focus keeps dropdown open if it has content
   input.addEventListener("focus", () => {
     if (dropdown.innerHTML.trim()) openDropdown(dropdown);
   });
 
-  // Enter -> preview first item if available
   input.addEventListener("keydown", (e) => {
     if (e.key !== "Enter") return;
     const list = getResultsArray();
