@@ -35,6 +35,8 @@ const TIMING = {
 };
 
 const CAST_LIMIT = 5;
+const GENRE_LIMIT = 4;
+const VIEWPORT_GAP = 8;
 
 const PLACEHOLDER_PROFILE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Crect fill="%231e1e2e" width="40" height="40" rx="20"/%3E%3Ctext fill="%2394a3b8" font-family="sans-serif" font-size="10" x="50%25" y="55%25" text-anchor="middle"%3E?%3C/text%3E%3C/svg%3E';
 
@@ -45,7 +47,10 @@ const PLACEHOLDER_PROFILE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/
 
 let hoverCardElement = null;
 let apiClient = null;
-let genresData = null;
+let genreMap = null;
+
+// Cached DOM element references
+let elements = {};
 
 let showTimeout = null;
 let hideTimeout = null;
@@ -88,26 +93,24 @@ const createGenreMap = (genres) => {
 const calculatePosition = (card) => {
     const cardRect = card.getBoundingClientRect();
     const hoverRect = hoverCardElement.getBoundingClientRect();
-
-    const gap = 8;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
     let left, top;
 
     // Try positioning to the right
-    if (cardRect.right + gap + hoverRect.width <= viewportWidth) {
-        left = cardRect.right + gap;
+    if (cardRect.right + VIEWPORT_GAP + hoverRect.width <= viewportWidth) {
+        left = cardRect.right + VIEWPORT_GAP;
     }
     // Try positioning to the left
-    else if (cardRect.left - gap - hoverRect.width >= 0) {
-        left = cardRect.left - gap - hoverRect.width;
+    else if (cardRect.left - VIEWPORT_GAP - hoverRect.width >= 0) {
+        left = cardRect.left - VIEWPORT_GAP - hoverRect.width;
     }
     // Position below, centered
     else {
-        left = Math.max(gap, Math.min(
+        left = Math.max(VIEWPORT_GAP, Math.min(
             cardRect.left + (cardRect.width / 2) - (hoverRect.width / 2),
-            viewportWidth - hoverRect.width - gap
+            viewportWidth - hoverRect.width - VIEWPORT_GAP
         ));
     }
 
@@ -115,11 +118,11 @@ const calculatePosition = (card) => {
     top = cardRect.top;
 
     // Clamp vertical position
-    if (top + hoverRect.height > viewportHeight - gap) {
-        top = viewportHeight - hoverRect.height - gap;
+    if (top + hoverRect.height > viewportHeight - VIEWPORT_GAP) {
+        top = viewportHeight - hoverRect.height - VIEWPORT_GAP;
     }
-    if (top < gap) {
-        top = gap;
+    if (top < VIEWPORT_GAP) {
+        top = VIEWPORT_GAP;
     }
 
     return { top, left };
@@ -133,26 +136,24 @@ const calculatePosition = (card) => {
 /**
  * Renders genre badges
  * @param {Array<number>} genreIds - Array of genre IDs
- * @param {Map<number, string>} genreMap - Genre ID to name map
  */
-const renderGenres = (genreIds, genreMap) => {
-    const container = select(hoverCardElement, SELECTORS.genres);
-    if (!container) return;
+const renderGenres = (genreIds) => {
+    if (!elements.genres) return;
 
-    container.innerHTML = '';
+    elements.genres.innerHTML = '';
 
     if (!genreIds || genreIds.length === 0) {
-        container.innerHTML = '<span class="text-xs text-fz-text-muted">No genres</span>';
+        elements.genres.innerHTML = '<span class="text-xs text-fz-text-muted">No genres</span>';
         return;
     }
 
-    genreIds.slice(0, 4).forEach((id) => {
+    genreIds.slice(0, GENRE_LIMIT).forEach((id) => {
         const name = genreMap.get(id);
         if (name) {
             const badge = document.createElement('span');
             badge.className = 'px-2 py-1 text-xs font-medium rounded-full bg-fz-accent/20 text-fz-accent';
             badge.textContent = name;
-            container.appendChild(badge);
+            elements.genres.appendChild(badge);
         }
     });
 };
@@ -162,20 +163,16 @@ const renderGenres = (genreIds, genreMap) => {
  * @param {Array<Object>} cast - Array of cast member objects
  */
 const renderCast = (cast) => {
-    const skeleton = select(hoverCardElement, SELECTORS.castSkeleton);
-    const container = select(hoverCardElement, SELECTORS.cast);
-
-    if (!container) return;
+    if (!elements.cast) return;
 
     // Hide skeleton, show cast container
-    hideElement(skeleton);
-    showElement(container);
-    removeClass(container, 'hidden');
+    hideElement(elements.castSkeleton);
+    showElement(elements.cast);
 
-    container.innerHTML = '';
+    elements.cast.innerHTML = '';
 
     if (!cast || cast.length === 0) {
-        container.innerHTML = '<span class="text-xs text-fz-text-muted">No cast info</span>';
+        elements.cast.innerHTML = '<span class="text-xs text-fz-text-muted">No cast info</span>';
         return;
     }
 
@@ -194,23 +191,9 @@ const renderCast = (cast) => {
             <span class="text-xs text-fz-text-muted text-center w-12 truncate">${actor.name.split(' ')[0]}</span>
         `;
 
-        container.appendChild(item);
+        elements.cast.appendChild(item);
     });
 };
-
-/**
- * Shows loading skeleton for cast
- */
-const showCastSkeleton = () => {
-    const skeleton = select(hoverCardElement, SELECTORS.castSkeleton);
-    const container = select(hoverCardElement, SELECTORS.cast);
-
-    showElement(skeleton);
-    removeClass(skeleton, 'hidden');
-    hideElement(container);
-    addClass(container, 'hidden');
-};
-
 
 // ============================================================================
 // DATA EXTRACTION
@@ -254,22 +237,22 @@ const extractCardData = (card) => {
  * @param {HTMLElement} card - Card element being hovered
  */
 const showHoverCard = async (card) => {
-    if (!hoverCardElement || !genresData) return;
+    if (!hoverCardElement || !genreMap) return;
 
     currentCard = card;
     const data = extractCardData(card);
-    const genreMap = createGenreMap(genresData);
 
-    // Phase 1: Render instant data
-    setText(select(hoverCardElement, SELECTORS.title), data.title);
-    setText(select(hoverCardElement, SELECTORS.rating), data.rating);
-    setText(select(hoverCardElement, SELECTORS.year), data.year);
-    setText(select(hoverCardElement, SELECTORS.runtime), '...');
-    setText(select(hoverCardElement, SELECTORS.overview), data.overview);
-    renderGenres(data.genreIds, genreMap);
+    // Phase 1: Render instant data using cached element references
+    setText(elements.title, data.title);
+    setText(elements.rating, data.rating);
+    setText(elements.year, data.year);
+    setText(elements.runtime, '...');
+    setText(elements.overview, data.overview);
+    renderGenres(data.genreIds);
 
-    // Show cast skeleton
-    showCastSkeleton();
+    // Show cast skeleton, hide cast
+    showElement(elements.castSkeleton);
+    hideElement(elements.cast);
 
     // Position and show card
     hoverCardElement.style.visibility = 'visible';
@@ -280,13 +263,9 @@ const showHoverCard = async (card) => {
         const { top, left } = calculatePosition(card);
         hoverCardElement.style.top = `${top}px`;
         hoverCardElement.style.left = `${left}px`;
-
-        // Fade in
-        requestAnimationFrame(() => {
-            hoverCardElement.style.opacity = '1';
-            addClass(hoverCardElement, 'hover-card-visible');
-            isVisible = true;
-        });
+        hoverCardElement.style.opacity = '1';
+        addClass(hoverCardElement, 'hover-card-visible');
+        isVisible = true;
     });
 
     // Phase 2: Fetch details for cast and runtime
@@ -303,7 +282,7 @@ const showHoverCard = async (card) => {
             ? `${details.number_of_seasons} Season${details.number_of_seasons !== 1 ? 's' : ''}`
             : `${details.runtime || 'N/A'} min`;
 
-        setText(select(hoverCardElement, SELECTORS.runtime), runtimeText);
+        setText(elements.runtime, runtimeText);
 
         // Render cast
         const cast = details.credits?.cast || [];
@@ -311,7 +290,7 @@ const showHoverCard = async (card) => {
 
     } catch (error) {
         console.warn('[HoverCard] Failed to fetch details:', error);
-        setText(select(hoverCardElement, SELECTORS.runtime), 'N/A');
+        setText(elements.runtime, 'N/A');
         renderCast([]);
     }
 };
@@ -413,15 +392,27 @@ const registerContainer = (container) => {
 // ============================================================================
 
 /**
+ * Detects if the device is primarily touch-based (mobile/tablet)
+ * Uses CSS media queries for accurate detection
+ * @returns {boolean} True if device is primarily touch-based
+ */
+const isTouchPrimaryDevice = () => {
+    const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const hasNoHover = window.matchMedia('(hover: none)').matches;
+    return hasCoarsePointer && hasNoHover;
+};
+
+/**
  * Initializes the hover card system
  * @param {Object} options - Initialization options
  * @param {Object} options.apiClient - TMDB API client instance
  * @param {Object} options.genres - Pre-loaded genres data
  */
 const initHoverCard = (options) => {
-    // Skip on touch devices
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-        console.info('[HoverCard] Touch device detected - skipping initialization');
+    // Skip on touch-primary devices (mobile/tablets)
+    // Hybrid devices (touchscreen laptops, WSL2) still use hover cards
+    if (isTouchPrimaryDevice()) {
+        console.info('[HoverCard] Touch-primary device detected - skipping initialization');
         return;
     }
 
@@ -432,20 +423,25 @@ const initHoverCard = (options) => {
         return;
     }
 
+    // Cache DOM element references
+    elements = {
+        title: select(hoverCardElement, SELECTORS.title),
+        rating: select(hoverCardElement, SELECTORS.rating),
+        year: select(hoverCardElement, SELECTORS.year),
+        runtime: select(hoverCardElement, SELECTORS.runtime),
+        overview: select(hoverCardElement, SELECTORS.overview),
+        genres: select(hoverCardElement, SELECTORS.genres),
+        castSkeleton: select(hoverCardElement, SELECTORS.castSkeleton),
+        cast: select(hoverCardElement, SELECTORS.cast),
+    };
+
     apiClient = options.apiClient;
-    genresData = options.genres;
+
+    // Cache genre map once at initialization
+    genreMap = createGenreMap(options.genres);
 
     console.info('[HoverCard] Initialized');
 };
-
-/**
- * Sets the genres data for mapping
- * @param {Object} genres - Genres data { movie: [...], tv: [...] }
- */
-const setGenresData = (genres) => {
-    genresData = genres;
-};
-
 
 // ============================================================================
 // EXPORTS
@@ -454,5 +450,4 @@ const setGenresData = (genres) => {
 export {
     initHoverCard,
     registerContainer,
-    setGenresData,
 };

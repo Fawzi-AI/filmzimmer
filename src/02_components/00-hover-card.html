@@ -28,18 +28,13 @@
     <div class="px-4 py-3 border-b border-fz-border">
         <div class="flex flex-wrap gap-2" data-element="hover-card-genres">
             <!-- Genre badges injected by JavaScript -->
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-fz-accent/20 text-fz-accent">
-                Action
-            </span>
         </div>
     </div>
 
     <!-- Overview -->
     <div class="px-4 py-3 border-b border-fz-border">
         <p class="text-sm text-fz-text-muted line-clamp-3"
-           data-element="hover-card-overview">
-            A brief overview of the movie or TV show...
-        </p>
+           data-element="hover-card-overview"></p>
     </div>
 
     <!-- Cast Section -->
@@ -48,29 +43,8 @@
             Top Cast
         </h4>
 
-        <!-- Cast Loading Skeleton -->
-        <div class="flex gap-3" data-element="hover-card-cast-skeleton">
-            <div class="flex flex-col items-center gap-1">
-                <div class="w-10 h-10 rounded-full skeleton"></div>
-                <div class="w-12 h-2 rounded skeleton"></div>
-            </div>
-            <div class="flex flex-col items-center gap-1">
-                <div class="w-10 h-10 rounded-full skeleton"></div>
-                <div class="w-12 h-2 rounded skeleton"></div>
-            </div>
-            <div class="flex flex-col items-center gap-1">
-                <div class="w-10 h-10 rounded-full skeleton"></div>
-                <div class="w-12 h-2 rounded skeleton"></div>
-            </div>
-            <div class="flex flex-col items-center gap-1">
-                <div class="w-10 h-10 rounded-full skeleton"></div>
-                <div class="w-12 h-2 rounded skeleton"></div>
-            </div>
-            <div class="flex flex-col items-center gap-1">
-                <div class="w-10 h-10 rounded-full skeleton"></div>
-                <div class="w-12 h-2 rounded skeleton"></div>
-            </div>
-        </div>
+        <!-- Cast Loading Skeleton (5 items generated via CSS) -->
+        <div class="flex gap-3 hover-card-cast-skeleton" data-element="hover-card-cast-skeleton"></div>
 
         <!-- Cast List (shown after loading) -->
         <div class="flex gap-3 hidden" data-element="hover-card-cast">

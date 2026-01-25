@@ -1,7 +1,22 @@
-.idea/
-.vscode/
+# Dependencies
 node_modules/
-.DS_Store
-*.log
+
+# Build and Distribution (Standard for web projects)
 dist/
 build/
+
+# IDE and Editor Configuration
+.idea/
+.vscode/
+.claude/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Logs and Debugging
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
